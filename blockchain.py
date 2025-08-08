@@ -1,33 +1,42 @@
-#importing time so that we can get the current time
+"""
+time lib is to get real time 
+hashlib is used to hash the given block
+"""
 import time
-#impoting hash-lib which will import hash fucntions in python
 import hashlib
 
-#creating the first block
+#creating a chain which will contain all the blocks
+chain = []
+
+#creating the first block and its hash than adding it to chain
 block0 = {
     "index": 0,
     "timestamp": time.time(),
     "data": "Genesis Block",
     "previous_hash": "0",
 }
-#creating whole genesis block to string so that we can hash the string 
-block0_string = str(block0)
-#hashing the string and stroring the hash in the block
-block0["hash"] = hashlib.sha256(block0_string.encode()).hexdigest()
+block0["hash"] = hashlib.sha256(str(block0).encode()).hexdigest()
+chain.append(block0)
 
-#creating block 1 which previous hash of hash genesis block 
-block1 = {
-    "index": 1,
-    "timestamp": time.time(),
-    "data": "block 1",
-    "previous_hash": block0["hash"]
-}
-#creating string of block 2
-block1_string = str(block1)
-#hashing the string and stroring the hash in the block
-block1["hash"] = hashlib.sha256(block1_string.encode()).hexdigest()
 
-#creating a function which will validate the blocks
+#function to add block in recursion 
+def add_block(chain,data):
+    last_block = chain[-1]
+    block = {
+        "index": len(chain),
+        "timestamp": time.time(),
+        "data": data,
+        "previous_hash": last_block["hash"]
+
+    }
+    block_string = str(block)
+    block["hash"]= hashlib.sha256(block_string.encode()).hexdigest()
+
+    # Append to chain
+    chain.append(block)
+
+
+#function which will validate the blocks
 def is_chain_valid(chain):
     for i in range(1,len(chain)):
         current_block = chain[i]
@@ -44,8 +53,11 @@ def is_chain_valid(chain):
         if current_block["previous_hash"] != previous_block["hash"]:
             print("you have wrong hash")
             return False
-    print("yay")
     return True
 
-chain = [block0,block1]
-is_chain_valid(chain)
+add_block(chain,"data1")
+add_block(chain,"data2")
+print(chain)
+print(is_chain_valid(chain))
+
+
