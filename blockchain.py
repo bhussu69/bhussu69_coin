@@ -1,17 +1,26 @@
 """
-time lib is to get real time 
-hashlib is used to hash the given block
+time    -> to get real time
+hashlib -> to hash the given block
+json    -> because str(dict) can mess up key order and break hashing
 """
 import time
 import hashlib
+import json
 
-#prarameters of the blockchain
-DIFFICULTY = 5 #this is required numbers of zero
+# Blockchain parameters
+DIFFICULTY = 5  # required number of leading zeros in the hash
 
 
+# helper: compute hash for a block (excluding its own 'hash' field)
+def compute_hash(block):
+    temp = block.copy()
+    temp.pop("hash", None)
+    block_string = json.dumps(temp, sort_keys=True)
+    return hashlib.sha256(block_string.encode()).hexdigest()
 
-#function to add block in recursion 
-def add_block(chain,data):
+
+# function to add a block
+def add_block(chain, data):
     last_block = chain[-1]
     block = {
         "index": len(chain),
@@ -19,57 +28,60 @@ def add_block(chain,data):
         "data": data,
         "previous_hash": last_block["hash"],
         "nonce": 0
-
     }
+
     while True:
-        block_string = str(block)
-        block["hash"]= hashlib.sha256(block_string.encode()).hexdigest()
+        block["hash"] = compute_hash(block)
         if block["hash"].startswith("0" * DIFFICULTY):
             break
-        else:
-            block["nonce"] += 1
+        block["nonce"] += 1
 
-    
-    # Append to chain
     chain.append(block)
 
 
-#function which will validate the blocks
+# function to validate the blockchain
 def is_chain_valid(chain):
-    for i in range(1,len(chain)):
+    for i in range(1, len(chain)):
         current_block = chain[i]
-        previous_block = chain[i-1]
+        previous_block = chain[i - 1]
 
-        #recalculate the hash of current block but firstly we have to pop the hash of current block 
-        copy_of_current_block = current_block.copy()
-        copy_of_current_block.pop("hash")
-        recalculated_hash = hashlib.sha256((str(copy_of_current_block)).encode()).hexdigest()
-
-        if recalculated_hash != current_block["hash"]:
-            print("chain have been tampered with") 
+        # check hash validity
+        if compute_hash(current_block) != current_block["hash"]:
+            print(f"Block {i} has been tampered with")
             return False
+
+        # check previous hash linkage
         if current_block["previous_hash"] != previous_block["hash"]:
-            print("you have wrong hash")
+            print(f"Block {i} has wrong previous_hash")
             return False
+
     return True
 
-#creating a chain which will contain all the blocks
+
+# create chain list
 chain = []
 
-#creating the first block and its hash than adding it to chain
-block0 = {
+# create genesis block
+genesis_block = {
     "index": 0,
     "timestamp": time.time(),
     "data": "Genesis Block",
     "previous_hash": "0",
-    "nonce":0
+    "nonce": 0
 }
-block0["hash"] = hashlib.sha256(str(block0).encode()).hexdigest()
-chain.append(block0)
 
-add_block(chain,"data1")
-add_block(chain,"data2")
+while True:
+    genesis_block["hash"] = compute_hash(genesis_block)
+    if genesis_block["hash"].startswith("0" * DIFFICULTY):
+        break
+    genesis_block["nonce"] += 1
+
+chain.append(genesis_block)
+
+# add more blocks
+add_block(chain, "data1")
+add_block(chain, "data2")
+
+# print results
 print(chain)
 print(is_chain_valid(chain))
-
-
