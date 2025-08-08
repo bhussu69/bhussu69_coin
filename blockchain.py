@@ -5,20 +5,6 @@ hashlib is used to hash the given block
 import time
 import hashlib
 
-#creating a chain which will contain all the blocks
-chain = []
-
-#creating the first block and its hash than adding it to chain
-block0 = {
-    "index": 0,
-    "timestamp": time.time(),
-    "data": "Genesis Block",
-    "previous_hash": "0",
-}
-block0["hash"] = hashlib.sha256(str(block0).encode()).hexdigest()
-chain.append(block0)
-
-
 #function to add block in recursion 
 def add_block(chain,data):
     last_block = chain[-1]
@@ -54,6 +40,19 @@ def is_chain_valid(chain):
             print("you have wrong hash")
             return False
     return True
+
+#creating a chain which will contain all the blocks
+chain = []
+
+#creating the first block and its hash than adding it to chain
+block0 = {
+    "index": 0,
+    "timestamp": time.time(),
+    "data": "Genesis Block",
+    "previous_hash": "0",
+}
+block0["hash"] = hashlib.sha256(str(block0).encode()).hexdigest()
+chain.append(block0)
 
 add_block(chain,"data1")
 add_block(chain,"data2")
