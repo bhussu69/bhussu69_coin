@@ -5,6 +5,11 @@ hashlib is used to hash the given block
 import time
 import hashlib
 
+#prarameters of the blockchain
+DIFFICULTY = 5 #this is required numbers of zero
+
+
+
 #function to add block in recursion 
 def add_block(chain,data):
     last_block = chain[-1]
@@ -12,12 +17,19 @@ def add_block(chain,data):
         "index": len(chain),
         "timestamp": time.time(),
         "data": data,
-        "previous_hash": last_block["hash"]
+        "previous_hash": last_block["hash"],
+        "nonce": 0
 
     }
-    block_string = str(block)
-    block["hash"]= hashlib.sha256(block_string.encode()).hexdigest()
+    while True:
+        block_string = str(block)
+        block["hash"]= hashlib.sha256(block_string.encode()).hexdigest()
+        if block["hash"].startswith("0" * DIFFICULTY):
+            break
+        else:
+            block["nonce"] += 1
 
+    
     # Append to chain
     chain.append(block)
 
@@ -50,6 +62,7 @@ block0 = {
     "timestamp": time.time(),
     "data": "Genesis Block",
     "previous_hash": "0",
+    "nonce":0
 }
 block0["hash"] = hashlib.sha256(str(block0).encode()).hexdigest()
 chain.append(block0)
