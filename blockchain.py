@@ -27,5 +27,25 @@ block1_string = str(block1)
 #hashing the string and stroring the hash in the block
 block1["hash"] = hashlib.sha256(block1_string.encode()).hexdigest()
 
-print(block0)
-print(block1)
+#creating a function which will validate the blocks
+def is_chain_valid(chain):
+    for i in range(1,len(chain)):
+        current_block = chain[i]
+        previous_block = chain[i-1]
+
+        #recalculate the hash of current block but firstly we have to pop the hash of current block 
+        copy_of_current_block = current_block.copy()
+        copy_of_current_block.pop("hash")
+        recalculated_hash = hashlib.sha256((str(copy_of_current_block)).encode()).hexdigest()
+
+        if recalculated_hash != current_block["hash"]:
+            print("chain have been tampered with") 
+            return False
+        if current_block["previous_hash"] != previous_block["hash"]:
+            print("you have wrong hash")
+            return False
+    print("yay")
+    return True
+
+chain = [block0,block1]
+is_chain_valid(chain)
